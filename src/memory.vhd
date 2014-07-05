@@ -1,7 +1,13 @@
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
-	
+--==============================================================================
+-- File: 	memory.vhd
+-- Author:	Pietro Lorefice
+-- Version:	1.0
+--==============================================================================
+-- Description:
+--   Memory module for the processor. Synchronous interface with two
+--   unidirectional data buses, single address port, memory selection and
+--   read/write command.
+--
 --  ============================
 --  |    Memory operations     | 
 --  ============================
@@ -11,6 +17,12 @@ use ieee.numeric_std.all;
 --  |   L   |   H   |   read   |
 --  |   L   |   L   |   write  |
 --  ============================	
+-- 
+--==============================================================================
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity memory is
 	generic (

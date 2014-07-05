@@ -1,3 +1,13 @@
+--==============================================================================
+-- File: 	processor.vhd
+-- Author:	Pietro Lorefice
+-- Version:	1.0
+--==============================================================================
+-- Description:
+--   Main module of the design. It contains the processor implementation.
+-- 
+--==============================================================================
+
 library ieee;
 use ieee.std_logic_1164.all;
 
