@@ -24,7 +24,7 @@ architecture tb_arch of memory_tb is
 	signal d_in, d_out : std_logic_vector(B-1 downto 0);
 begin
 
-	uut : entity work.memory(reg_file)
+	uut : entity work.memory(RTL)
 		generic map(N => N,
 			        B => B)
 		port map(clk   => clk,

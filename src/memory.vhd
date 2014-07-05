@@ -40,7 +40,7 @@ entity memory is
 	);
 end entity memory;
 
-architecture reg_file of memory is
+architecture RTL of memory is
 	type mem_t is array(2**N - 1 downto 0) of std_logic_vector(B-1 downto 0);
 	
 	signal mem_i : mem_t; -- Storage element
@@ -54,6 +54,7 @@ begin
 	begin
 		if arst = '1' then
 			mem_i <= (others => (others => '0'));
+			mem_i(0) <= (others => '1'); -- Debug
 		elsif rising_edge(clk) then
 			if (sel_l = '0' and rw_l = '0') then
 				mem_i(to_integer(unsigned(addr))) <= w_data;
@@ -68,4 +69,4 @@ begin
 	r_data <= mem_i(to_integer(unsigned(addr))) when (sel_l = '0' and rw_l = '1') else
 			(others => '0');
 
-end architecture reg_file;
+end architecture RTL;
