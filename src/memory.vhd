@@ -44,6 +44,8 @@ architecture RTL of memory is
 	type mem_t is array(2**N - 1 downto 0) of std_logic_vector(B-1 downto 0);
 	
 	signal mem_i : mem_t; -- Storage element
+	
+	signal r_data_q : std_logic_vector(B-1 downto 0);	-- Data output register
 begin
 
 	-- =================
@@ -54,10 +56,18 @@ begin
 	begin
 		if arst = '1' then
 			mem_i <= (others => (others => '0'));
-			mem_i(0) <= (others => '1'); -- Debug
+			r_data_q <= (others => '0');
+			
+			-- Debug commands
+			mem_i(0) <= (others => '1'); -- First memory location filled with ONEs
+			
 		elsif rising_edge(clk) then
-			if (sel_l = '0' and rw_l = '0') then
+			if (sel_l = '1') then
+				r_data_q <= (others => '0');
+			elsif rw_l = '0' then
 				mem_i(to_integer(unsigned(addr))) <= w_data;
+			else
+				r_data_q <= mem_i(to_integer(unsigned(addr)));
 			end if;
 		end if;
 	end process ram_reg;
@@ -66,7 +76,6 @@ begin
 	-- | Output logic |
 	-- ================
 	
-	r_data <= mem_i(to_integer(unsigned(addr))) when (sel_l = '0' and rw_l = '1') else
-			(others => '0');
+	r_data <= r_data_q;
 
 end architecture RTL;

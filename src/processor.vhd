@@ -67,47 +67,47 @@ architecture RTL of processor is
 	-- =============
 	type reg_t is array(2**R - 1 downto 0) of std_logic_vector(B-1 downto 0);
 	
-	signal regs_q : reg_t;								-- General register file
-	signal src_reg_i : std_logic_vector(R-1 downto 0);	-- Source register index
-	signal dst_reg_i : std_logic_vector(R-1 downto 0);	-- Destination register index
+	signal regs_q		: reg_t;							-- General register file
+	signal src_reg_i	: std_logic_vector(R-1 downto 0);	-- Source register index
+	signal dst_reg_i	: std_logic_vector(R-1 downto 0);	-- Destination register index
 	
-	signal pc_q, pc_n : std_logic_vector(N-1 downto 0);		-- Program counter
-	signal ir_q, ir_n : std_logic_vector(B-1 downto 0);		-- Instruction register
-	signal mar_q, mar_n : std_logic_vector(N-1 downto 0);	-- Memory address register
-	signal mdo_q, mdo_n : std_logic_vector(B-1 downto 0);	-- Memory data out
-	signal sp_q, sp_n : std_logic_vector(N-1 downto 0);		-- Stack Pointer
-	signal st_q, st_n : std_logic_vector(B-1 downto 0);		-- Status register
+	signal pc_q, pc_n	: std_logic_vector(N-1 downto 0);	-- Program counter
+	signal ir_q, ir_n	: std_logic_vector(B-1 downto 0);	-- Instruction register
+	signal mar_q, mar_n	: std_logic_vector(N-1 downto 0);	-- Memory address register
+	signal mdo_q, mdo_n	: std_logic_vector(B-1 downto 0);	-- Memory data out
+	signal sp_q, sp_n 	: std_logic_vector(N-1 downto 0);	-- Stack Pointer
+	signal st_q, st_n	: std_logic_vector(B-1 downto 0);	-- Status register
 	
-	signal rw_q, rw_n : std_logic;		-- Memory read/write output reg.
-	signal sel_q, sel_n : std_logic;	-- Memory selection output reg.
+	signal rw_q, rw_n	: std_logic;						-- Memory read/write output reg.
+	signal sel_q, sel_n : std_logic;						-- Memory selection output reg.
 begin
 	
-	-- ====================
-	-- | Registers update |
-	-- ====================
+	-- =========================
+	-- | Register update logic |
+	-- =========================
 	clk_re : process(clk, arst) is
 	begin
 		if arst = '1' then
 			state_q <= fetch0;
-			regs_q <= (others => (others => '0'));
-			pc_q <= (others => '0');
-			ir_q <= (others => '0');
-			mar_q <= (others => '0');
-			mdo_q <= (others => '0');
-			sp_q <= (others => '0');
-			st_q <= (others => '0');
-			rw_q <= '1';
-			sel_q <= '1';
+			 regs_q <= (others => (others => '0'));
+			   pc_q <= (others => '0');
+			   ir_q <= (others => '0');
+			  mar_q <= (others => '0');
+			  mdo_q <= (others => '0');
+			   sp_q <= (others => '0');
+			   st_q <= (others => '0');
+			   rw_q <= '1';
+			  sel_q <= '1';
 		elsif rising_edge(clk) then
 			state_q <= state_n;
-			pc_q <= pc_n;
-			ir_q <= ir_n;
-			mar_q <= mar_n;
-			mdo_q <= mdo_n;
-			sp_q <= sp_n;
-			st_q <= st_n;
-			rw_q <= rw_n;
-			sel_q <= sel_n;
+			   pc_q <= pc_n;
+			   ir_q <= ir_n;
+			  mar_q <= mar_n;
+			  mdo_q <= mdo_n;
+			   sp_q <= sp_n;
+			   st_q <= st_n;
+			   rw_q <= rw_n;
+			  sel_q <= sel_n;
 		end if;
 	end process clk_re;
 	
@@ -117,14 +117,14 @@ begin
 	fsm : process (ir_q, mar_q, mdo_q, pc_q, rw_q, sel_q, sp_q, st_q, state_q) is
 	begin
 		state_n <= state_q;
-		pc_n <= pc_q;
-		ir_n <= ir_q;
-		mar_n <= mar_q;
-		mdo_n <= mdo_q;
-		sp_n <= sp_q;
-		st_n <= st_q;
-		rw_n <= rw_q;
-		sel_n <= sel_q;
+		   pc_n <= pc_q;
+		   ir_n <= ir_q;
+		  mar_n <= mar_q;
+		  mdo_n <= mdo_q;
+		   sp_n <= sp_q;
+		   st_n <= st_q;
+		   rw_n <= rw_q;
+		  sel_n <= sel_q;
 		
 		case state_q is 
 			when fetch0 =>

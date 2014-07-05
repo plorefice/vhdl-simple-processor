@@ -16,12 +16,12 @@ begin
 			     
 	clk_gen : process is
 	begin
-		clk <= '1';
-		wait for T/2;
 		clk <= '0';
+		wait for T/2;
+		clk <= '1';
 		wait for T/2;
 	end process clk_gen;
 	
-	arst <= '1', '0' after T/2;
+	arst <= '1', '0' after T/4;
 
 end architecture tb_arch;

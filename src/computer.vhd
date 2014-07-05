@@ -12,6 +12,7 @@ architecture struct of computer is
 	constant N : integer := 20;
 	constant B : integer := 32;
 	
+	-- Internal signals for block interconnections
 	signal rw_l_i		: std_logic;
 	signal sel_l_i		: std_logic;
 	signal addr_i		: std_logic_vector(N-1 downto 0);
