@@ -9,8 +9,9 @@ entity computer is
 end entity computer;
 
 architecture struct of computer is
-	constant N : integer := 20;
-	constant B : integer := 32;
+	constant N : integer := 16;
+	constant B : integer := 16;
+	constant R : integer := 4;
 	
 	-- Internal signals for block interconnections
 	signal rw_l_i		: std_logic;
@@ -22,9 +23,10 @@ begin
 	
 	proc_0 : entity work.processor(RTL)
 		generic map(N => N,
-			        B => B)
+			        B => B,
+			        R => R)
 		port map(clk    => clk,
-			     arst   => arst,
+			     rst   => arst,
 			     r_data => data_m2p_i,
 			     rw_l   => rw_l_i,
 			     sel_l  => sel_l_i,

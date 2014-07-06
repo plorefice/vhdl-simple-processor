@@ -22,6 +22,6 @@ begin
 		wait for T/2;
 	end process clk_gen;
 	
-	arst <= '1', '0' after T/4;
+	arst <= '1', '0' after 3*T/4;
 
 end architecture tb_arch;

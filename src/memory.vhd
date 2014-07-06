@@ -58,8 +58,9 @@ begin
 			mem_i <= (others => (others => '0'));
 			r_data_q <= (others => '0');
 			
-			-- Debug commands
-			mem_i(0) <= (others => '1'); -- First memory location filled with ONEs
+			-- Debug instructions
+			mem_i(0) <= X"0123"; -- ADD R1, R2, R3
+			mem_i(1) <= X"1123"; -- SUB R1, R2, R3
 			
 		elsif rising_edge(clk) then
 			if (sel_l = '1') then

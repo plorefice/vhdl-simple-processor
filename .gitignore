@@ -7,3 +7,6 @@ tb/work/_lib1_0.qtl
 tb/work/_vmake
 tb/computer.cr.mti
 tb/vsim.wlf
+*.qpg
+*.qtl
+*.qdb
