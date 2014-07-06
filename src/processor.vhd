@@ -1,7 +1,6 @@
 --==============================================================================
 -- File: 	processor.vhd
 -- Author:	Pietro Lorefice
--- Version:	1.0
 --==============================================================================
 -- Description:
 --   Main module of the design. It contains the processor implementation.
@@ -50,6 +49,7 @@ entity processor is
 	port (
 		clk		: in  std_logic;						-- Clock
 		rst		: in  std_logic;						-- Synchronous reset
+		
 		r_data	: in  std_logic_vector(B-1 downto 0);	-- Data in
 		rw_l	: out std_logic;						-- Read/write
 		sel_l	: out std_logic;						-- Memory select
@@ -76,11 +76,6 @@ architecture RTL of processor is
 	-- =============
 	-- | Registers |
 	-- =============
-	type reg_t is array(2**R - 1 downto 0) of std_logic_vector(B-1 downto 0);
-	
-	signal regs_q, regs_n	: reg_t;							-- General register file
-	signal reg_d_q, reg_d_n	: std_logic_vector(R-1 downto 0);	-- Destination register index
-	
 	signal op_a_q, op_a_n	: std_logic_vector(B-1 downto 0);	-- Operand A
 	signal op_b_q, op_b_n	: std_logic_vector(B-1 downto 0);	-- Operand B
 	
@@ -96,6 +91,12 @@ architecture RTL of processor is
 	
 	signal alu_sel_i	: std_logic_vector(2 downto 0);		-- ALU operation selector
 	signal alu_out_i	: std_logic_vector(B-1 downto 0);	-- ALU output
+	
+	signal reg_we_l		: std_logic;						-- Register write enable
+	signal reg_r_addr_1	: std_logic_vector(R-1 downto 0);	-- Register read addr. 1
+	signal reg_r_addr_2	: std_logic_vector(R-1 downto 0);	-- Register read addr. 2
+	signal reg_w_addr	: std_logic_vector(R-1 downto 0);	-- Register write addr.
+	signal reg_w_data	: std_logic_vector(B-1 downto 0);	-- Register write data
 begin
 	
 	-- ==================
@@ -111,6 +112,19 @@ begin
 			     ov  => open,
 			     sf  => open,
 			     y   => alu_out_i);	
+			     
+	reg_file_inst : entity work.reg_file
+		generic map(B => B,
+			        R => R)
+		port map(clk       => clk,
+			     rst       => rst,
+			     we_l      => reg_we_l,
+			     w_data    => reg_w_data,
+			     w_addr    => reg_w_addr,
+			     rd_addr_1 => reg_r_addr_1,
+			     rd_addr_2 => reg_r_addr_2,
+			     rd_data_1 => op_a_n,
+			     rd_data_2 => op_b_n);
 	
 	-- =========================
 	-- | Register update logic |
@@ -119,9 +133,7 @@ begin
 	begin
 		if rising_edge(clk) then
 			if rst = '1' then
-				state_q <= fetch_0;			 
-				 regs_q <= (others => (others => '0'));
-				reg_d_q <= (others => '0');
+				state_q <= fetch_0;
 				 op_a_q <= (others => '0');
 				 op_b_q <= (others => '0');
 				   pc_q <= (others => '0');
@@ -134,13 +146,9 @@ begin
 				  sel_q <= '1';
 				  
 			  -- Debug values for the registers
-			  regs_q(2) <= X"0001"; -- R2
-			  regs_q(3) <= X"0002";	-- R3
 			  
 			else
-				 regs_q <= regs_n;
 				state_q <= state_n;
-				reg_d_q <= reg_d_n;
 				 op_a_q <= op_a_n;
 				 op_b_q <= op_b_n;
 				   pc_q <= pc_n;
@@ -158,24 +166,22 @@ begin
 	-- =====================
 	-- | FSM control logic |
 	-- =====================
-	fsm : process (ir_q, mar_q, mdo_q, pc_q, rw_q, sel_q, sp_q, st_q, state_q, r_data, alu_out_i, reg_d_q, regs_q, op_a_q, op_b_q) is
+	fsm : process (ir_q, mar_q, mdo_q, pc_q, rw_q, sel_q, sp_q, st_q, state_q, r_data, alu_out_i) is
 	begin
 		-- =======================
 		-- | Next-value defaults |
 		-- =======================
-		state_n <= state_q;
-		 regs_n <= regs_q;
-		reg_d_n <= reg_d_q;
-		 op_a_n <= op_a_q;
-		 op_b_n <= op_b_q;
-		   pc_n <= pc_q;
-		   ir_n <= ir_q;
-		  mar_n <= mar_q;
-		  mdo_n <= mdo_q;
-		   sp_n <= sp_q;
-		   st_n <= st_q;
-		   rw_n <= rw_q;
-		  sel_n <= sel_q;
+		 state_n <= state_q;
+		    pc_n <= pc_q;
+		    ir_n <= ir_q;
+		   mar_n <= mar_q;
+		   mdo_n <= mdo_q;
+		    sp_n <= sp_q;
+		    st_n <= st_q;
+		    rw_n <= rw_q;
+		   sel_n <= sel_q;
+		  
+		reg_we_l <= '1';
 		
 		-- =======
 		-- | FSM |
@@ -210,10 +216,9 @@ begin
 			
 			-- Move operands from registers to OP_A and OP_B, and execute
 			when decode_rrr_0 =>
-				reg_d_n <= ir_q(11 downto 8);
-				
-				op_a_n <= regs_q(to_integer(unsigned(ir_q(7 downto 4))));
-				op_b_n <= regs_q(to_integer(unsigned(ir_q(3 downto 0))));
+				reg_w_addr <= ir_q(11 downto 8);
+				reg_r_addr_1 <= ir_q(7 downto 4);
+				reg_r_addr_2 <= ir_q(3 downto 0);
 				
 				-- Execute based on OPCODE
 				case ir_q(15 downto 12) is
@@ -245,7 +250,8 @@ begin
 			
 			-- Write result to register 
 			when write_r =>
-				regs_n(to_integer(unsigned(reg_d_q))) <= alu_out_i;
+				reg_w_data <= alu_out_i;
+				reg_we_l <= '0';
 				state_n <= fetch_0;
 				
 			when halt =>

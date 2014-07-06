@@ -1,7 +1,6 @@
 --==============================================================================
 -- File: 	alu.vhd
 -- Author:	Pietro Lorefice
--- Version:	1.0
 --==============================================================================
 -- Description:
 --   Arithmetic logic unit inside the processor. Asynchronous interface with 
@@ -36,10 +35,12 @@ entity alu is
 		sel	: in  std_logic_vector(2 downto 0);		-- Operation selector
 		a 	: in  std_logic_vector(W-1 downto 0);	-- First operand
 		b	: in  std_logic_vector(W-1 downto 0);	-- Second operang
+		
 		cf	: out std_logic;						-- Carry flag
 		zf	: out std_logic;						-- Zero flag
 		ov	: out std_logic;						-- Overflow flag
 		sf	: out std_logic;						-- Sign flag
+		
 		y	: out std_logic_vector(W-1 downto 0)	-- Result
 	);
 end entity alu;

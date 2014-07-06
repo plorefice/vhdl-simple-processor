@@ -1,3 +1,12 @@
+--==============================================================================
+-- File: 	computer.vhd
+-- Author:	Pietro Lorefice
+--==============================================================================
+-- Description:
+--   Complete design of the machine.
+--
+--==============================================================================
+
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -33,14 +42,15 @@ begin
 			     addr   => addr_i,
 			     w_data => data_p2m_i);
 			     
-	mem_0 : entity work.memory(RTL)
+	mem_0 : entity work.d_mem(RTL)
 		generic map(N => N,
 			        B => B)
 		port map(clk    => clk,
-			     arst   => arst,
-			     rw_l   => rw_l_i,
+			     rst    => arst,
+			     we_l   => rw_l_i,
 			     sel_l  => sel_l_i,
-			     addr   => addr_i,
+			     r_addr => addr_i,
+			     w_addr => addr_i,
 			     w_data => data_p2m_i,
 			     r_data => data_m2p_i);
 
