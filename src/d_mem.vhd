@@ -14,8 +14,8 @@ use ieee.numeric_std.all;
 
 entity d_mem is
 	generic (
-		N : integer := 20; -- # of addresses
-		B : integer := 8   -- Word size
+		N : integer; -- # of addresses
+		B : integer   -- Word size
 	);
 	port (
 		clk		: in  std_logic;						-- Clock

@@ -29,7 +29,7 @@ use ieee.numeric_std.all;
 
 entity alu is
 	generic (
-		W : integer := 8   -- Data width
+		W : integer   -- Data width
 	);
 	port (
 		sel	: in  std_logic_vector(2 downto 0);		-- Operation selector

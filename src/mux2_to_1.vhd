@@ -12,7 +12,7 @@ use ieee.std_logic_1164.all;
 
 entity mux2_to_1 is
 	generic (
-		W : integer := 16
+		W : integer
 	);
 	port (
 		a	: in  std_logic_vector(W-1 downto 0);

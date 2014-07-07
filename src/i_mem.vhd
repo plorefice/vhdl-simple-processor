@@ -13,8 +13,8 @@ use ieee.numeric_std.all;
 
 entity i_mem is
 	generic (
-		N : integer := 16;
-		B : integer := 16
+		N : integer;
+		B : integer
 	);
 	port (
 		clk 	: in std_logic;							-- Clock
@@ -40,6 +40,11 @@ begin
 		if rising_edge(clk) then
 			if rst = '1' then
 				mem <= (others => (others => '0'));
+				
+				-- Debug instructions
+				mem(0) <= X"0111";		-- ADD R1, R2, R3
+				mem(1) <= X"0412";		-- ADD R4, R1, R2
+				
 			else
 				instr_q <= mem(to_integer(unsigned(addr)));
 			end if;

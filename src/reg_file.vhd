@@ -13,8 +13,8 @@ use ieee.numeric_std.all;
 
 entity reg_file is
 	generic (
-		B : integer := 16;	-- Register size
-		R : integer := 4	-- 2**R registers
+		B : integer;	-- Register size
+		R : integer		-- 2**R registers
 	);
 	port (
 		clk			: in  std_logic;						-- Clock
@@ -47,8 +47,12 @@ begin
 				reg_file_q <= (others => (others => '0'));
 				
 				-- Debug section
-				reg_file_q(2) <= X"0001";
-				reg_file_q(3) <= X"0002";
+				reg_file_q(0) <= X"0019";
+				reg_file_q(1) <= X"0064";
+				reg_file_q(2) <= X"007a";
+				reg_file_q(3) <= X"004d";
+				reg_file_q(4) <= X"0052";
+				reg_file_q(5) <= X"007b";
 				
 			elsif we_l = '0' then
 				reg_file_q(to_integer(unsigned(w_addr))) <= w_data;
