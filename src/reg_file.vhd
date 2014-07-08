@@ -44,16 +44,7 @@ begin
 	begin
 		if rising_edge(clk) then
 			if rst = '1' then
-				reg_file_q <= (others => (others => '0'));
-				
-				-- Debug section
-				reg_file_q(0) <= X"0019";
-				reg_file_q(1) <= X"0064";
-				reg_file_q(2) <= X"007a";
-				reg_file_q(3) <= X"004d";
-				reg_file_q(4) <= X"0052";
-				reg_file_q(5) <= X"007b";
-				
+				reg_file_q <= (others => (others => '0'));				
 			elsif we_l = '0' then
 				reg_file_q(to_integer(unsigned(w_addr))) <= w_data;
 			end if;

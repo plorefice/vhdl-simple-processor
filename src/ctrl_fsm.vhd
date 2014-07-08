@@ -39,9 +39,10 @@ architecture RTL of ctrl_fsm is
 	-- ==================
 	type state_t is (fetch, fetch_w,
 					 decode,
-					 read,
-					 execute,
-					 write
+					 read_dab, read_dai, read_d_b, read_d_i,
+					 exec_0, exec_1, exec_2, exec_3, exec_4,
+					 write_reg,
+					 hlt
 					);
 	
 	signal state_q, state_n : state_t;
@@ -115,7 +116,7 @@ begin
 				  ir_en_q, pc_en_q,
 				  mem_sel_l_q, mem_we_l_q,
 				  reg_op_a_sel_q, reg_op_b_sel_q, reg_we_l_q, reg_wr_d_sel_q
-	) is
+				 ) is
 	begin
 		state_n <= state_q;
 		
@@ -134,62 +135,136 @@ begin
 		mem_we_l_n  <= mem_we_l_q;
 		
 		case state_q is 
+			
+			-- ===============
+			-- | Fetch phase |
+			-- ===============
 			when fetch =>
-				state_n <= fetch_w;
-				
 				reg_we_l_n  <= '1';
 				mem_sel_l_n <= '1';
 				mem_we_l_n  <= '1';
 				
 				pc_en_n <= '1';
-			
-			when fetch_w =>
-				state_n <= decode;
-				
-				pc_en_n <= '0';
 				ir_en_n <= '1';
 				
-			when decode =>
-				state_n <= read;
+				state_n <= fetch_w;
+
+			when fetch_w =>
+				pc_en_n <= '0';
 				
+				state_n <= decode;
+						
+			-- ================
+			-- | Decode phase |			
+			-- ================
+			when decode =>
 				ir_en_n <= '0';
 				
 				case opcode is
 					when X"0" | X"1" =>
-						reg_op_a_sel_n <= '1'; -- Ra
-						reg_op_b_sel_n <= '1'; -- Rb
-						reg_wr_d_sel_n <= '1'; -- ALU result
-						state_n <= execute;  -- No read
+						state_n <= read_dab;
+						
+					when X"2" =>
+						state_n <= read_dai;
+						
+					when X"3" =>
+						state_n <= read_d_b;
+						
+					when X"4" =>
+						state_n <= read_d_i;
 						
 					when others =>
 						null;
 				end case;
 				
-			when read =>
-				state_n <= execute;
+			-- ==============
+			-- | Read phase |
+			-- ==============
+			when read_dab =>
+				reg_op_a_sel_n <= '1'; -- 1st operand = Ra
+				reg_op_b_sel_n <= '1'; -- 2nd operand = Rb
+				reg_wr_d_sel_n <= '1'; -- Result = ALU
 				
-			when execute =>
-				state_n <= write;
+				alu_op_b_sel_n <= '0'; -- 2nd ALU operand = Rb
 				
 				case opcode is
-					when X"0" | X"1" =>
-						alu_ctrl_op_n <= "10"; -- Ra + Rb
-						alu_op_b_sel_n <= '0'; -- Rb
-						
+					when X"0" =>
+						state_n <= exec_0;
+					when X"1" =>
+						state_n <= exec_1;
 					when others =>
 						null;
 				end case;
 				
-			when write =>
+			when read_dai =>
+				reg_op_a_sel_n <= '1'; -- 1st operand = Ra
+				reg_op_b_sel_n <= '0'; -- 2nd operand = Don't care
+				reg_wr_d_sel_n <= '1'; -- Result = ALU
+				
+				alu_op_b_sel_n <= '1'; -- 2nd ALU operand = Immediate
+				
+				state_n <= exec_2;
+				
+			when read_d_b =>
+				reg_op_a_sel_n <= '0'; -- 1st operand = Rd
+				reg_op_b_sel_n <= '1'; -- 2nd operand = Rb
+				reg_wr_d_sel_n <= '1'; -- Result = ALU
+				
+				alu_op_b_sel_n <= '0'; -- 2nd ALU operand = Rb
+				
+				state_n <= exec_3;
+				
+			when read_d_i =>
+				reg_op_a_sel_n <= '0'; -- 1st operand = Rd
+				reg_op_b_sel_n <= '0'; -- 2nd operand = Don't care
+				reg_wr_d_sel_n <= '1'; -- Result = ALU
+				
+				alu_op_b_sel_n <= '1'; -- 2nd ALU operand = Immediate
+				
+				state_n <= exec_4;
+				
+			-- ===================
+			-- | Execution phase |
+			-- ===================
+			when exec_0 =>
+				alu_ctrl_op_n <= "10"; -- Ra + Rb
+				
+				state_n <= write_reg;
+				
+			when exec_1 =>
+				alu_ctrl_op_n <= "11"; -- Ra - Rb
+				
+				state_n <= write_reg;
+				
+			when exec_2 =>
+				alu_ctrl_op_n <= "10"; -- Ra + imm
+				
+				state_n <= write_reg;
+				
+			when exec_3 =>
+				alu_ctrl_op_n <= "00"; -- Rd {&|!x} Rb
+				
+				state_n <= write_reg;
+				
+			when exec_4 =>
+				alu_ctrl_op_n <= "00"; -- Rd {&|!x} imm
+				
+				state_n <= write_reg;
+				
+			-- ===============
+			-- | Write phase |
+			-- ===============
+			when write_reg =>
+				reg_we_l_n <= '0';
+				
 				state_n <= fetch;
+			
+			-- ================
+			-- | !! HALTED !! |
+			-- ================
+			when hlt =>
+				state_n <= hlt;
 				
-				case opcode is
-					when X"0" | X"1" =>
-						reg_we_l_n <= '0';
-						
-					when others =>
-						null;
-				end case;
 		end case;
 	end process fsm;
 	
