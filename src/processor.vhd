@@ -45,20 +45,29 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 entity processor is
+	generic (
+		N : integer;
+		B : integer;
+		R : integer
+	);
 	port (
 		clk : in std_logic;
-		rst : in std_logic
+		rst : in std_logic;
+		
+		i_mem_instr		: in  std_logic_vector(B-1 downto 0);
+		d_mem_data_in	: in  std_logic_vector(B-1 downto 0);
+		
+		i_mem_addr		: out std_logic_vector(N-1 downto 0);
+		d_mem_r_addr	: out std_logic_vector(N-1 downto 0);
+		d_mem_w_addr	: out std_logic_vector(N-1 downto 0);
+		d_mem_w_data	: out std_logic_vector(B-1 downto 0);
+		
+		d_mem_sel_l		: out std_logic;
+		d_mem_we_l		: out std_logic
 	);
 end entity processor;
 
-architecture struct of processor is
-	-- =============
-	-- | Constants |
-	-- =============
-	constant N : integer := 16; -- Memory size ( = data width for simplicity)
-	constant B : integer := 16; -- Data width
-	constant R : integer := 4;	-- Register file dimension
-	
+architecture struct of processor is	
 	-- ====================
 	-- | Internal signals |
 	-- ====================
@@ -110,7 +119,15 @@ begin
 			     reg_data_b_en => reg_data_b_en,
 			     mem_sel_l     => mem_sel_l,
 			     mem_we_l      => mem_we_l,
-			     opcode        => opcode);
+			     i_mem_instr   => i_mem_instr,
+			     d_mem_data_in => d_mem_data_in,
+			     opcode        => opcode,
+			     i_mem_addr    => i_mem_addr,
+			     d_mem_sel_l   => d_mem_sel_l,
+			     d_mem_we_l    => d_mem_we_l,
+			     d_mem_r_addr  => d_mem_r_addr,
+			     d_mem_w_addr  => d_mem_w_addr,
+			     d_mem_w_data  => d_mem_w_data);
 			     
 	-- =======
 	-- | FSM |

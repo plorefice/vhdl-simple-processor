@@ -36,13 +36,23 @@ entity data_path is
 		reg_addr_b_en	: in std_logic;	-- Regfile address B register enable
 		reg_we_l		: in std_logic;	-- Register file write enable
 		reg_wr_d_sel	: in std_logic;	-- Register file write data select
-		reg_data_a_en	: in std_logic;
-		reg_data_b_en	: in std_logic;
+		reg_data_a_en	: in std_logic;	-- Register file operand A register enable
+		reg_data_b_en	: in std_logic;	-- Register file operand B register enable
 		
 		mem_sel_l		: in std_logic;	-- Data memory select
 		mem_we_l		: in std_logic;	-- Data memory write enable
 		
-		opcode			: out std_logic_vector(3 downto 0)
+		i_mem_instr		: in  std_logic_vector(N-1 downto 0);	-- Next instruction from i-memory
+		d_mem_data_in	: in  std_logic_vector(B-1 downto 0);	-- Data in from d-memory
+		
+		opcode			: out std_logic_vector(3 downto 0);		-- Current opcode
+		i_mem_addr		: out std_logic_vector(N-1 downto 0);	-- Address of the next instruction to be fetched
+		
+		d_mem_sel_l		: out std_logic;						-- D-memory select
+		d_mem_we_l		: out std_logic;						-- D-memory write enable
+		d_mem_r_addr	: out std_logic_vector(N-1 downto 0);	-- D-memory read address
+		d_mem_w_addr	: out std_logic_vector(N-1 downto 0);	-- D-memory write address
+		d_mem_w_data	: out std_logic_vector(B-1 downto 0)	-- D-memory data out
 	);
 end entity data_path;
 
@@ -84,13 +94,7 @@ begin
 	-- ===========================
 	-- | Instruction fetch logic |
 	-- ===========================
-	i_mem_unit : entity work.i_mem
-		generic map(N => N,
-			        B => B)
-		port map(clk   => clk,
-			     rst   => rst,
-			     addr  => pc_q,
-			     instr => ir_n);
+	ir_n <= i_mem_instr;
 			     
 	ir_unit : entity work.reg_en
 		generic map(N => B)
@@ -132,6 +136,8 @@ begin
 			     b   => ir_q(3 downto 0),
 			     sel => reg_op_b_sel,
 			     q   => reg_addr_b_n);
+			     
+	mem_data_out <= d_mem_data_in;
 			     
 	reg_addr_w_mux_unit : entity work.mux2_to_1
 		generic map(W => B)
@@ -213,24 +219,15 @@ begin
 			     d   => alu_result_n,
 			     q   => alu_result_q);
 			     
-	-- =====================
-	-- | Data memory logic |
-	-- =====================
-	d_mem_unit : entity work.d_mem
-		generic map(N => N,
-			        B => B)
-		port map(clk    => clk,
-			     rst    => rst,
-			     we_l   => mem_we_l,
-			     sel_l  => mem_sel_l,
-			     r_addr => alu_result_n,
-			     w_addr => alu_result_q,
-			     w_data => reg_data_b_q,
-			     r_data => mem_data_out);
-			     
 	-- ================
 	-- | Output logic |
 	-- ================
-	opcode <= ir_q(15 downto 12);
+	opcode 		<= ir_q(15 downto 12);
+	i_mem_addr	<= pc_q;
+	d_mem_sel_l <= mem_sel_l;
+	d_mem_we_l	<= mem_we_l;
+	d_mem_r_addr <= alu_result_n;
+	d_mem_w_addr <= alu_result_q;
+	d_mem_w_data <= reg_data_b_q;
 	
 end architecture struct;
