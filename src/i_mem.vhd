@@ -42,13 +42,15 @@ begin
 				mem <= (others => (others => '0'));
 				
 				-- Debug instructions
-				mem(0) <= X"210F";	-- ADDI R1, R0, $15
-				mem(1) <= X"2207";	-- ADDI R2, R0, $7
-				mem(2) <= X"0312";	-- ADD  R3, R1, R2
-				mem(3) <= X"1412";	-- SUB  R4, R1, R2
-				mem(4) <= X"1521";  -- SUB  R5, R2, R1
-				mem(5) <= X"261F";  -- ADDI R6, R1, $15
-				mem(6) <= X"3726";  -- OR   R7, R6	
+				mem(0) <= X"210F";	-- ADDI R1,  R0, $15
+				mem(1) <= X"2207";	-- ADDI R2,  R0, $7
+				mem(2) <= X"0312";	-- ADD  R3,  R1, R2
+				mem(3) <= X"1412";	-- SUB  R4,  R1, R2
+				mem(4) <= X"1521";  -- SUB  R5,  R2, R1
+				mem(5) <= X"261F";  -- ADDI R6,  R1, $15
+				mem(6) <= X"3726";  -- OR   R7,  R6	
+				mem(7) <= X"8700";  -- ST   R7,	 R0, $0
+				mem(8) <= X"5F00";  -- LD   R15, R0, $0
 				
 			else
 				instr_q <= mem(to_integer(unsigned(addr)));

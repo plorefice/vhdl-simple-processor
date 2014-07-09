@@ -40,8 +40,8 @@ architecture RTL of ctrl_fsm is
 	type state_t is (fetch, fetch_w,
 					 decode,
 					 read_dab, read_dai, read_d_b, read_d_i,
-					 exec_0, exec_1, exec_2, exec_3, exec_4,
-					 write_reg,
+					 add, sub, addi, log, logi, ld, st,
+					 write_reg_alu, write_reg_mem, write_reg_mem_w, write_mem, 
 					 hlt
 					);
 	
@@ -164,7 +164,7 @@ begin
 					when X"0" | X"1" =>
 						state_n <= read_dab;
 						
-					when X"2" =>
+					when X"2" | X"5" | X"6" | X"8" | X"9" =>
 						state_n <= read_dai;
 						
 					when X"3" =>
@@ -183,79 +183,117 @@ begin
 			when read_dab =>
 				reg_op_a_sel_n <= '1'; -- 1st operand = Ra
 				reg_op_b_sel_n <= '1'; -- 2nd operand = Rb
-				reg_wr_d_sel_n <= '1'; -- Result = ALU
 				
 				alu_op_b_sel_n <= '0'; -- 2nd ALU operand = Rb
 				
 				case opcode is
 					when X"0" =>
-						state_n <= exec_0;
+						state_n <= add;
+						
 					when X"1" =>
-						state_n <= exec_1;
+						state_n <= sub;
+						
 					when others =>
-						null;
+						state_n <= hlt;
 				end case;
 				
 			when read_dai =>
 				reg_op_a_sel_n <= '1'; -- 1st operand = Ra
-				reg_op_b_sel_n <= '0'; -- 2nd operand = Don't care
-				reg_wr_d_sel_n <= '1'; -- Result = ALU
+				reg_op_b_sel_n <= '0'; -- 2nd operand = Rd
 				
 				alu_op_b_sel_n <= '1'; -- 2nd ALU operand = Immediate
 				
-				state_n <= exec_2;
+				case opcode is
+					when X"2" =>
+						state_n <= addi;
+						
+					when X"5" | X"6" =>
+						state_n <= ld;
+						
+					when X"8" | X"9" =>
+						state_n <= st;
+						
+					when others =>
+						state_n <= hlt;
+				end case;
 				
 			when read_d_b =>
 				reg_op_a_sel_n <= '0'; -- 1st operand = Rd
 				reg_op_b_sel_n <= '1'; -- 2nd operand = Rb
-				reg_wr_d_sel_n <= '1'; -- Result = ALU
 				
 				alu_op_b_sel_n <= '0'; -- 2nd ALU operand = Rb
 				
-				state_n <= exec_3;
+				state_n <= log;
 				
 			when read_d_i =>
 				reg_op_a_sel_n <= '0'; -- 1st operand = Rd
 				reg_op_b_sel_n <= '0'; -- 2nd operand = Don't care
-				reg_wr_d_sel_n <= '1'; -- Result = ALU
 				
 				alu_op_b_sel_n <= '1'; -- 2nd ALU operand = Immediate
 				
-				state_n <= exec_4;
+				state_n <= logi;
 				
 			-- ===================
 			-- | Execution phase |
 			-- ===================
-			when exec_0 =>
+			when add =>
 				alu_ctrl_op_n <= "10"; -- Ra + Rb
 				
-				state_n <= write_reg;
+				state_n <= write_reg_alu;
 				
-			when exec_1 =>
+			when sub =>
 				alu_ctrl_op_n <= "11"; -- Ra - Rb
 				
-				state_n <= write_reg;
+				state_n <= write_reg_alu;
 				
-			when exec_2 =>
+			when addi =>
 				alu_ctrl_op_n <= "10"; -- Ra + imm
 				
-				state_n <= write_reg;
+				state_n <= write_reg_alu;
 				
-			when exec_3 =>
+			when log =>
 				alu_ctrl_op_n <= "00"; -- Rd {&|!x} Rb
 				
-				state_n <= write_reg;
+				state_n <= write_reg_alu;
 				
-			when exec_4 =>
+			when logi =>
 				alu_ctrl_op_n <= "00"; -- Rd {&|!x} imm
 				
-				state_n <= write_reg;
+				state_n <= write_reg_alu;
+				
+			when ld =>
+				alu_ctrl_op_n <= "10"; -- Ra + imm
+				
+				state_n <= write_reg_mem;
+				
+			when st =>
+				alu_ctrl_op_n <= "10"; -- Ra + imm
+				
+				state_n <= write_mem;
 				
 			-- ===============
 			-- | Write phase |
 			-- ===============
-			when write_reg =>
+			when write_reg_alu =>
+				reg_wr_d_sel_n <= '1'; -- Result = ALU
 				reg_we_l_n <= '0';
+				
+				state_n <= fetch;
+				
+			when write_reg_mem =>
+				reg_wr_d_sel_n <= '0'; -- Result = Memory
+				reg_we_l_n <= '0';
+				
+				mem_sel_l_n <= '0';
+				
+				state_n <= write_reg_mem_w;
+				
+			when write_reg_mem_w =>
+				state_n <= fetch;
+				
+			when write_mem =>
+				mem_sel_l_n <= '0';
+				mem_we_l_n <= '0';
 				
 				state_n <= fetch;
 			
