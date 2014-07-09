@@ -66,16 +66,23 @@ architecture struct of processor is
 	signal pc_en		: std_logic;
 	signal ir_en		: std_logic;
 	
-	signal alu_op_b_sel	: std_logic;					
-	signal alu_ctrl_op	: std_logic_vector(1 downto 0);
-	
-	signal reg_we_l		: std_logic;
-	signal reg_op_a_sel	: std_logic;
-	signal reg_op_b_sel	: std_logic;
-	signal reg_wr_d_sel	: std_logic;
-	
 	signal mem_sel_l	: std_logic;
 	signal mem_we_l		: std_logic;
+	
+	signal reg_addr_a_en	: std_logic;
+	signal reg_addr_b_en	: std_logic;
+	signal reg_data_a_en	: std_logic;
+	signal reg_data_b_en	: std_logic;
+	signal reg_we_l			: std_logic;
+	signal reg_op_a_sel		: std_logic;
+	signal reg_op_b_sel		: std_logic;
+	signal reg_wr_d_sel		: std_logic;
+	
+	
+	signal alu_op_b_en		: std_logic;
+	signal alu_op_b_sel		: std_logic;
+	signal alu_result_en	: std_logic;
+	signal alu_ctrl_op		: std_logic_vector(1 downto 0);
 begin
 	
 	-- =============
@@ -85,36 +92,48 @@ begin
 		generic map(N => N,
 			        B => B,
 			        R => R)
-		port map(clk          => clk,
-			     rst          => rst,
-			     alu_op_b_sel => alu_op_b_sel,
-			     alu_ctrl_op  => alu_ctrl_op,
-			     pc_en        => pc_en,
-			     ir_en        => ir_en,
-			     reg_we_l     => reg_we_l,
-			     reg_op_a_sel => reg_op_a_sel,
-			     reg_op_b_sel => reg_op_b_sel,
-			     reg_wr_d_sel => reg_wr_d_sel,
-			     mem_sel_l    => mem_sel_l,
-			     mem_we_l     => mem_we_l,
-			     opcode       => opcode);
+		port map(clk           => clk,
+			     rst           => rst,
+			     alu_op_b_en   => alu_op_b_en,
+			     alu_op_b_sel  => alu_op_b_sel,
+			     alu_result_en => alu_result_en,
+			     alu_ctrl_op   => alu_ctrl_op,
+			     pc_en         => pc_en,
+			     ir_en         => ir_en,
+			     reg_op_a_sel  => reg_op_a_sel,
+			     reg_op_b_sel  => reg_op_b_sel,
+			     reg_addr_a_en => reg_addr_a_en,
+			     reg_addr_b_en => reg_addr_b_en,
+			     reg_we_l      => reg_we_l,
+			     reg_wr_d_sel  => reg_wr_d_sel,
+			     reg_data_a_en => reg_data_a_en,
+			     reg_data_b_en => reg_data_b_en,
+			     mem_sel_l     => mem_sel_l,
+			     mem_we_l      => mem_we_l,
+			     opcode        => opcode);
 			     
 	-- =======
 	-- | FSM |
 	-- =======
 	ctrl_fsm_unit : entity work.ctrl_fsm
-		port map(clk          => clk,
-			     rst          => rst,
-			     opcode       => opcode,
-			     alu_op_b_sel => alu_op_b_sel,
-			     alu_ctrl_op  => alu_ctrl_op,
-			     pc_en        => pc_en,
-			     ir_en        => ir_en,
-			     reg_we_l     => reg_we_l,
-			     reg_op_a_sel => reg_op_a_sel,
-			     reg_op_b_sel => reg_op_b_sel,
-			     reg_wr_d_sel => reg_wr_d_sel,
-			     mem_sel_l    => mem_sel_l,
-			     mem_we_l     => mem_we_l);
+		port map(clk           => clk,
+			     rst           => rst,
+			     opcode        => opcode,
+			     alu_op_b_en   => alu_op_b_en,
+			     alu_op_b_sel  => alu_op_b_sel,
+			     alu_result_en => alu_result_en,
+			     alu_ctrl_op   => alu_ctrl_op,
+			     pc_en         => pc_en,
+			     ir_en         => ir_en,
+			     reg_op_a_sel  => reg_op_a_sel,
+			     reg_op_b_sel  => reg_op_b_sel,
+			     reg_addr_a_en => reg_addr_a_en,
+			     reg_addr_b_en => reg_addr_b_en,
+			     reg_we_l      => reg_we_l,
+			     reg_wr_d_sel  => reg_wr_d_sel,
+			     reg_data_a_en => reg_data_a_en,
+			     reg_data_b_en => reg_data_b_en,
+			     mem_sel_l     => mem_sel_l,
+			     mem_we_l      => mem_we_l);
 
 end architecture struct;

@@ -49,8 +49,8 @@ begin
 				mem(4) <= X"1521";  -- SUB  R5,  R2, R1
 				mem(5) <= X"261F";  -- ADDI R6,  R1, $15
 				mem(6) <= X"3726";  -- OR   R7,  R6	
-				mem(7) <= X"8700";  -- ST   R7,	 R0, $0
-				mem(8) <= X"5F00";  -- LD   R15, R0, $0
+				mem(7) <= X"8703";  -- ST   R7,	 R0, $3
+				mem(8) <= X"5F03";  -- LD   R15, R0, $3
 				
 			else
 				instr_q <= mem(to_integer(unsigned(addr)));
